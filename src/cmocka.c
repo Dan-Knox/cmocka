@@ -105,6 +105,13 @@
 # define cm_longjmp(env, val)   longjmp(env, val)
 #endif
 
+#define ANSI_COLOR_RED     "\x1b[31m"
+#define ANSI_COLOR_GREEN   "\x1b[32m"
+#define ANSI_COLOR_YELLOW  "\x1b[33m"
+#define ANSI_COLOR_BLUE    "\x1b[34m"
+#define ANSI_COLOR_MAGENTA "\x1b[35m"
+#define ANSI_COLOR_CYAN    "\x1b[36m"
+#define ANSI_COLOR_RESET   "\x1b[0m"
 
 /*
  * Declare and initialize the pointer member of ValuePointer variable name
@@ -2370,31 +2377,31 @@ static void cmprintf_group_finish_standard(size_t total_executed,
     size_t i;
 
     print_message("[==========] %u test(s) run.\n", (unsigned)total_executed);
-    print_error("[  PASSED  ] %u test(s).\n",
+    print_error(ANSI_COLOR_GREEN "[  PASSED  ] %u test(s).\n" ANSI_COLOR_RESET,
                 (unsigned)(total_passed));
 
     if (total_skipped) {
-        print_error("[  SKIPPED ] %"PRIdS " test(s), listed below:\n", total_skipped);
+        print_error(ANSI_COLOR_YELLOW "[  SKIPPED ] %"PRIdS " test(s), listed below:\n" ANSI_COLOR_RESET, total_skipped);
         for (i = 0; i < total_executed; i++) {
             struct CMUnitTestState *cmtest = &cm_tests[i];
 
             if (cmtest->status == CM_TEST_SKIPPED) {
-                print_error("[  SKIPPED ] %s\n", cmtest->test->name);
+                print_error(ANSI_COLOR_YELLOW "[  SKIPPED ] %s\n" ANSI_COLOR_RESET, cmtest->test->name);
             }
         }
-        print_error("\n %u SKIPPED TEST(S)\n", (unsigned)(total_skipped));
+        print_error(ANSI_COLOR_YELLOW "\n %u SKIPPED TEST(S)\n" ANSI_COLOR_RESET, (unsigned)(total_skipped));
     }
 
     if (total_failed) {
-        print_error("[  FAILED  ] %"PRIdS " test(s), listed below:\n", total_failed);
+        print_error(ANSI_COLOR_RED "[  FAILED  ] %"PRIdS " test(s), listed below:\n" ANSI_COLOR_RESET, total_failed);
         for (i = 0; i < total_executed; i++) {
             struct CMUnitTestState *cmtest = &cm_tests[i];
 
             if (cmtest->status == CM_TEST_FAILED) {
-                print_error("[  FAILED  ] %s\n", cmtest->test->name);
+                print_error(ANSI_COLOR_RED "[  FAILED  ] %s\n" ANSI_COLOR_RESET, cmtest->test->name);
             }
         }
-        print_error("\n %u FAILED TEST(S)\n",
+        print_error(ANSI_COLOR_RED "\n %u FAILED TEST(S)\n" ANSI_COLOR_RESET,
                     (unsigned)(total_failed + total_errors));
     }
 }
@@ -2408,22 +2415,22 @@ static void cmprintf_standard(enum cm_printf_type type,
         print_message("[ RUN      ] %s\n", test_name);
         break;
     case PRINTF_TEST_SUCCESS:
-        print_message("[       OK ] %s\n", test_name);
+        print_message(ANSI_COLOR_GREEN "[       OK ] %s\n" ANSI_COLOR_RESET, test_name);
         break;
     case PRINTF_TEST_FAILURE:
         if (error_message != NULL) {
-            print_error("[  ERROR   ] --- %s\n", error_message);
+            print_error(ANSI_COLOR_YELLOW "[  ERROR   ] --- %s\n" ANSI_COLOR_RESET, error_message);
         }
-        print_message("[  FAILED  ] %s\n", test_name);
+        print_message(ANSI_COLOR_RED "[  FAILED  ] %s\n" ANSI_COLOR_RESET, test_name);
         break;
     case PRINTF_TEST_SKIPPED:
-        print_message("[  SKIPPED ] %s\n", test_name);
+        print_message(ANSI_COLOR_BLUE "[  SKIPPED ] %s\n" ANSI_COLOR_RESET, test_name);
         break;
     case PRINTF_TEST_ERROR:
         if (error_message != NULL) {
-            print_error("%s\n", error_message);
+            print_error(ANSI_COLOR_RED "%s\n" ANSI_COLOR_RESET, error_message);
         }
-        print_error("[  ERROR   ] %s\n", test_name);
+        print_error(ANSI_COLOR_RED "[  ERROR   ] %s\n" ANSI_COLOR_RESET, test_name);
         break;
     }
 }
@@ -3251,20 +3258,20 @@ int _run_tests(const UnitTest * const tests, const size_t number_of_tests) {
     }
 
     print_message("[==========] %"PRIdS " test(s) run.\n", tests_executed);
-    print_error("[  PASSED  ] %"PRIdS " test(s).\n", tests_executed - total_failed);
+    print_error(ANSI_COLOR_GREEN "[  PASSED  ] %"PRIdS " test(s).\n" ANSI_COLOR_RESET, tests_executed - total_failed);
 
     if (total_failed > 0) {
-        print_error("[  FAILED  ] %"PRIdS " test(s), listed below:\n", total_failed);
+        print_error(ANSI_COLOR_RED "[  FAILED  ] %"PRIdS " test(s), listed below:\n" ANSI_COLOR_RESET, total_failed);
         for (i = 0; i < total_failed; i++) {
-            print_error("[  FAILED  ] %s\n", failed_names[i]);
+            print_error(ANSI_COLOR_RED "[  FAILED  ] %s\n" ANSI_COLOR_RESET, failed_names[i]);
         }
     } else {
-        print_error("\n %"PRIdS " FAILED TEST(S)\n", total_failed);
+        print_error(ANSI_COLOR_RED "\n %"PRIdS " FAILED TEST(S)\n" ANSI_COLOR_RESET, total_failed);
     }
 
     if (number_of_test_states != 0) {
-        print_error("[  ERROR   ] Mismatched number of setup %"PRIdS " and "
-                    "teardown %"PRIdS " functions\n", setups, teardowns);
+        print_error(ANSI_COLOR_RED "[  ERROR   ] Mismatched number of setup %"PRIdS " and "
+                    "teardown %"PRIdS " functions\n" ANSI_COLOR_RESET, setups, teardowns);
         total_failed = (size_t)-1;
     }
 
@@ -3413,15 +3420,15 @@ int _run_group_tests(const UnitTest * const tests, const size_t number_of_tests)
     }
 
     print_message("[==========] %"PRIdS " test(s) run.\n", tests_executed);
-    print_error("[  PASSED  ] %"PRIdS " test(s).\n", tests_executed - total_failed);
+    print_error(ANSI_COLOR_GREEN "[  PASSED  ] %"PRIdS " test(s).\n" ANSI_COLOR_RESET, tests_executed - total_failed);
 
     if (total_failed) {
-        print_error("[  FAILED  ] %"PRIdS " test(s), listed below:\n", total_failed);
+        print_error(ANSI_COLOR_RED "[  FAILED  ] %"PRIdS " test(s), listed below:\n" ANSI_COLOR_RESET, total_failed);
         for (i = 0; i < total_failed; i++) {
-            print_error("[  FAILED  ] %s\n", failed_names[i]);
+            print_error(ANSI_COLOR_RED "[  FAILED  ] %s\n" ANSI_COLOR_RESET, failed_names[i]);
         }
     } else {
-        print_error("\n %"PRIdS " FAILED TEST(S)\n", total_failed);
+        print_error(ANSI_COLOR_RED "\n %"PRIdS " FAILED TEST(S)\n" ANSI_COLOR_RESET, total_failed);
     }
 
     free((void*)failed_names);
